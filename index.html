@@ -9,14 +9,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #121212; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Auth Screen */
         #auth-screen { position: fixed; inset: 0; background: #121212; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
         .auth-box { background: #1c1c1e; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #2c2c2e; }
         .auth-box h2 { margin-bottom: 8px; font-size: 20px; }
         .auth-box p { color: #8e8e93; font-size: 14px; margin-bottom: 20px; }
         .auth-box input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #3a3a3c; background: #2c2c2e; color: white; font-size: 16px; margin-bottom: 14px; text-align: center; }
         
-        /* Header & Controls */
         .header { text-align: center; margin-bottom: 16px; }
         .header span { color: #8e8e93; font-size: 13px; }
         
@@ -25,34 +23,35 @@
         
         select { width: 100%; background: #2c2c2e; color: #ffffff; border: 1px solid #3a3a3c; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; outline: none; }
         
-        /* Timeframe Grid */
         .tf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
         .tf-btn { background: #2c2c2e; border: 1px solid #3a3a3c; color: #d1d1d6; padding: 10px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
         .tf-btn.active { background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316; }
 
-        /* Signal Status Box */
         .status-box { background: linear-gradient(145deg, #1e241e, #181c18); border: 1px solid #2e3b2e; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
         .status-title { font-size: 22px; font-weight: 700; color: #f97316; margin-bottom: 6px; }
         .status-sub { font-size: 13px; color: #a1a1aa; }
         .signal-action { font-size: 17px; font-weight: 700; margin: 12px 0; text-align: center; color: #22c55e; }
         .signal-action.down { color: #ef4444; }
 
-        /* 8 Readings Grid */
         .readings-header { display: flex; justify-content: space-between; font-size: 12px; color: #8e8e93; margin-bottom: 8px; padding: 0 4px; }
         .grid-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        
         .reading-card { background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; padding: 12px; transition: 0.3s; }
-        .reading-card.active-scan { border-color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2); }
+        .reading-card.scanning { border-color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); background: #25201d; }
+        .reading-card.success-green { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); }
+        .reading-card.success-red { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+        
         .reading-label { font-size: 11px; color: #8e8e93; margin-bottom: 4px; }
         .reading-val { font-size: 13px; font-weight: 600; color: #ffffff; }
+        .reading-val.green { color: #22c55e; }
+        .reading-val.red { color: #ef4444; }
 
-        /* Main Button */
         .btn-orange { width: 100%; background: #f97316; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: auto; }
         .btn-orange:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <!-- Kòd Sekrè -->
     <div id="auth-screen">
         <div class="auth-box">
             <h2>Aksè Restrikte 🔒</h2>
@@ -66,11 +65,10 @@
         <span>Trade Bot • mini app</span>
     </div>
 
-    <!-- Chwazi Mache (OTC, Gold, Forex) -->
     <div class="card">
         <label>Chwazi Pè / Mache (OTC • Gold • Forex)</label>
         <select id="pair-select">
-            <optgroup label="🔥 Pocket Option OTC">
+            <optgroup label="🔥 Tout Pè Pocket Option OTC">
                 <option value="EUR/USD OTC">EUR/USD OTC</option>
                 <option value="GBP/USD OTC">GBP/USD OTC</option>
                 <option value="USD/JPY OTC">USD/JPY OTC</option>
@@ -83,7 +81,7 @@
                 <option value="AUD/CAD OTC">AUD/CAD OTC</option>
                 <option value="NZD/USD OTC">NZD/USD OTC</option>
             </optgroup>
-            <optgroup label="🥇 Metal (Lò)">
+            <optgroup label="🥇 Metal (Lò / Gold)">
                 <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
                 <option value="GOLD (XAU/USD)">GOLD (XAU/USD)</option>
             </optgroup>
@@ -97,7 +95,6 @@
         </select>
     </div>
 
-    <!-- Chwazi Timeframe (3 sec rive 2 min) -->
     <div class="card">
         <label>Trade time</label>
         <div class="tf-grid" id="tf-container">
@@ -110,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Ekran Analiz -->
     <div class="status-box">
         <div class="status-title" id="status-title">Ready to Scan</div>
         <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
@@ -118,7 +114,6 @@
 
     <div class="signal-action" id="signal-action"></div>
 
-    <!-- 8 Analiz yo -->
     <div class="readings-header">
         <span>Readings • market analysis</span>
         <span id="scan-counter">0 of 8</span>
@@ -167,8 +162,8 @@
         }
 
         let selectedTimeframe = "5 sec";
+        let activeTimer = null;
 
-        // Jere bouton timeframe yo
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
@@ -178,7 +173,6 @@
             });
         });
 
-        // Kòd sekirite (ou ka antre nenpòt kòd oswa mete pa w la)
         function unlockApp() {
             const code = document.getElementById('secret-code').value.trim();
             if (code.length > 0) {
@@ -196,14 +190,21 @@
             const signalAction = document.getElementById('signal-action');
             const counter = document.getElementById('scan-counter');
 
+            if (activeTimer) clearInterval(activeTimer);
+
             btn.disabled = true;
             signalAction.innerText = "";
             statusTitle.innerText = "Analyzing...";
             statusTitle.style.color = "#f97316";
 
-            // Reyajiste 8 bwat yo
             const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
-            valIds.forEach(id => document.getElementById(id).innerText = "...");
+            
+            for (let i = 1; i <= 8; i++) {
+                const c = document.getElementById(`card-${i}`);
+                c.className = "reading-card";
+                document.getElementById(valIds[i-1]).innerText = "...";
+                document.getElementById(valIds[i-1]).className = "reading-val";
+            }
 
             try {
                 const res = await fetch(`/api/signal?pair=${encodeURIComponent(pair)}&timeframe=${encodeURIComponent(selectedTimeframe)}`);
@@ -220,26 +221,45 @@
                     data.rsi
                 ];
 
-                // Efè eskanè 1 of 8 rive 8 of 8
+                const isUp = data.direction === "HIGHER";
+
                 for (let i = 0; i < 8; i++) {
                     const card = document.getElementById(`card-${i + 1}`);
-                    card.classList.add('active-scan');
+                    card.classList.add('scanning');
                     counter.innerText = `${i + 1} of 8`;
                     statusSub.innerText = `⚡ Analyzing step ${i + 1} of 8...`;
                     
-                    await new Promise(r => setTimeout(r, 220));
+                    await new Promise(r => setTimeout(r, 450));
                     
-                    document.getElementById(valIds[i]).innerText = values[i];
-                    card.classList.remove('active-scan');
+                    card.classList.remove('scanning');
+                    card.classList.add(isUp ? 'success-green' : 'success-red');
+                    
+                    const valEl = document.getElementById(valIds[i]);
+                    valEl.innerText = values[i];
+                    valEl.classList.add(isUp ? 'green' : 'red');
                 }
 
-                // Afiche rezilta final la
-                statusTitle.innerText = data.direction === "HIGHER" ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
-                statusTitle.style.color = data.direction === "HIGHER" ? "#22c55e" : "#ef4444";
-                statusSub.innerText = `${pair} • ${selectedTimeframe}`;
+                statusTitle.innerText = isUp ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
+                statusTitle.style.color = isUp ? "#22c55e" : "#ef4444";
                 
                 signalAction.innerText = data.signal_text;
-                signalAction.className = data.direction === "HIGHER" ? "signal-action" : "signal-action down";
+                signalAction.className = isUp ? "signal-action" : "signal-action down";
+
+                // Revèy Antre (Entry Countdown Timer - 10 segond)
+                let timeLeft = 10;
+                statusSub.innerText = `⏳ Entry window open: ${timeLeft}s`;
+                statusSub.style.color = "#f97316";
+
+                activeTimer = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        statusSub.innerText = `⏳ Entry window open: ${timeLeft}s`;
+                    } else {
+                        clearInterval(activeTimer);
+                        statusSub.innerText = "🔒 Entry window closed";
+                        statusSub.style.color = "#ef4444";
+                    }
+                }, 1000);
 
             } catch (err) {
                 statusTitle.innerText = "Connection Error";
