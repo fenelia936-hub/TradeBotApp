@@ -2,142 +2,248 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trade Bot Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0d1112; color: #ffffff; font-family: sans-serif; margin: 0; padding: 16px; }
-        .header { text-align: center; font-size: 14px; color: #8b949e; margin-bottom: 10px; }
-        .pair-box { background: #161b1d; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .signal-card { background: linear-gradient(135deg, #16241d 0%, #111618 100%); border: 1px solid #234232; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
-        .signal-title { font-size: 28px; font-weight: bold; color: #4ade80; margin: 0; }
-        .signal-title.lower { color: #f87171; }
-        .instruction { text-align: center; color: #f59e0b; font-size: 13px; margin-bottom: 16px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .card { background: #161b1d; padding: 12px; border-radius: 12px; }
-        .card-label { font-size: 11px; color: #8b949e; }
-        .card-val { font-size: 13px; font-weight: 600; margin-top: 4px; color: #e2e8f0; }
-        .red { color: #f87171; }
-        .green { color: #4ade80; }
-        .btn-refresh { width: 100%; background: #f97316; color: #000; font-weight: bold; border: none; padding: 14px; border-radius: 12px; font-size: 15px; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #121212; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Ekran Modpas Prive */
-        #authScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #0d1112; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 9999; padding: 20px; box-sizing: border-box;
-        }
-        .auth-box { background: #161b1d; padding: 24px; border-radius: 16px; border: 1px solid #30363d; width: 100%; max-width: 320px; text-align: center; }
-        .auth-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1112; color: #fff; font-size: 16px; text-align: center; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .auth-btn { width: 100%; background: #f97316; color: #000; font-weight: bold; border: none; padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; }
+        /* Auth Screen */
+        #auth-screen { position: fixed; inset: 0; background: #121212; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
+        .auth-box { background: #1c1c1e; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #2c2c2e; }
+        .auth-box h2 { margin-bottom: 8px; font-size: 20px; }
+        .auth-box p { color: #8e8e93; font-size: 14px; margin-bottom: 20px; }
+        .auth-box input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #3a3a3c; background: #2c2c2e; color: white; font-size: 16px; margin-bottom: 14px; text-align: center; }
+        
+        /* Header & Controls */
+        .header { text-align: center; margin-bottom: 16px; }
+        .header span { color: #8e8e93; font-size: 13px; }
+        
+        .card { background: #1c1c1e; border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid #2c2c2e; }
+        label { display: block; font-size: 12px; color: #8e8e93; margin-bottom: 6px; }
+        
+        select { width: 100%; background: #2c2c2e; color: #ffffff; border: 1px solid #3a3a3c; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; outline: none; }
+        
+        /* Timeframe Grid */
+        .tf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .tf-btn { background: #2c2c2e; border: 1px solid #3a3a3c; color: #d1d1d6; padding: 10px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
+        .tf-btn.active { background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316; }
+
+        /* Signal Status Box */
+        .status-box { background: linear-gradient(145deg, #1e241e, #181c18); border: 1px solid #2e3b2e; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
+        .status-title { font-size: 22px; font-weight: 700; color: #f97316; margin-bottom: 6px; }
+        .status-sub { font-size: 13px; color: #a1a1aa; }
+        .signal-action { font-size: 17px; font-weight: 700; margin: 12px 0; text-align: center; color: #22c55e; }
+        .signal-action.down { color: #ef4444; }
+
+        /* 8 Readings Grid */
+        .readings-header { display: flex; justify-content: space-between; font-size: 12px; color: #8e8e93; margin-bottom: 8px; padding: 0 4px; }
+        .grid-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .reading-card { background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; padding: 12px; transition: 0.3s; }
+        .reading-card.active-scan { border-color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.2); }
+        .reading-label { font-size: 11px; color: #8e8e93; margin-bottom: 4px; }
+        .reading-val { font-size: 13px; font-weight: 600; color: #ffffff; }
+
+        /* Main Button */
+        .btn-orange { width: 100%; background: #f97316; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: auto; }
+        .btn-orange:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <!-- Ekran Modpas Prive -->
-    <div id="authScreen">
+    <!-- Kòd Sekrè -->
+    <div id="auth-screen">
         <div class="auth-box">
-            <h3 style="color: #fff; margin-top: 0; margin-bottom: 8px;">Aksè Restrikte 🔒</h3>
-            <p style="color: #8b949e; font-size: 12px; margin-bottom: 20px;">Antre kòd sekrè w la pou w ka itilize bot la.</p>
-            <input type="password" id="accessCode" class="auth-input" placeholder="Antre kòd la...">
-            <button class="auth-btn" onclick="verifyCode()">Desann / Louvri</button>
-            <p id="errorMsg" style="color: #f87171; font-size: 12px; margin-top: 10px; height: 15px;"></p>
+            <h2>Aksè Restrikte 🔒</h2>
+            <p>Antre kòd sekrè w la pou w ka itilize bot la.</p>
+            <input type="password" id="secret-code" placeholder="Antre kòd la...">
+            <button class="btn-orange" onclick="unlockApp()">Desann / Louvri</button>
         </div>
     </div>
 
-    <div class="header">Trade Bot • mini app</div>
-    
-    <div class="pair-box">
-        <select id="pairSelect" style="background:transparent; color:white; border:none; font-size:16px; font-weight:bold;">
-            <option value="EUR/USD">EUR/USD</option>
-            <option value="GBP/USD">GBP/USD</option>
-            <option value="USD/JPY">USD/JPY</option>
+    <div class="header">
+        <span>Trade Bot • mini app</span>
+    </div>
+
+    <!-- Chwazi Mache (OTC, Gold, Forex) -->
+    <div class="card">
+        <label>Chwazi Pè / Mache (OTC • Gold • Forex)</label>
+        <select id="pair-select">
+            <optgroup label="🔥 Pocket Option OTC">
+                <option value="EUR/USD OTC">EUR/USD OTC</option>
+                <option value="GBP/USD OTC">GBP/USD OTC</option>
+                <option value="USD/JPY OTC">USD/JPY OTC</option>
+                <option value="AUD/USD OTC">AUD/USD OTC</option>
+                <option value="USD/CAD OTC">USD/CAD OTC</option>
+                <option value="USD/CHF OTC">USD/CHF OTC</option>
+                <option value="EUR/GBP OTC">EUR/GBP OTC</option>
+                <option value="EUR/JPY OTC">EUR/JPY OTC</option>
+                <option value="GBP/JPY OTC">GBP/JPY OTC</option>
+                <option value="AUD/CAD OTC">AUD/CAD OTC</option>
+                <option value="NZD/USD OTC">NZD/USD OTC</option>
+            </optgroup>
+            <optgroup label="🥇 Metal (Lò)">
+                <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
+                <option value="GOLD (XAU/USD)">GOLD (XAU/USD)</option>
+            </optgroup>
+            <optgroup label="🌍 Forex Mache Reyèl">
+                <option value="EUR/USD">EUR/USD</option>
+                <option value="GBP/USD">GBP/USD</option>
+                <option value="USD/JPY">USD/JPY</option>
+                <option value="AUD/USD">AUD/USD</option>
+                <option value="USD/CAD">USD/CAD</option>
+            </optgroup>
         </select>
-        <span style="font-size:12px; color:#8b949e;">OTC • 5 sec</span>
     </div>
 
-    <div class="signal-card" id="signalCard">
-        <div id="signalContent">
-            <p id="signalText" class="signal-title">HIGHER</p>
-            <span style="font-size:12px; color:#8b949e;">Entry window active</span>
+    <!-- Chwazi Timeframe (3 sec rive 2 min) -->
+    <div class="card">
+        <label>Trade time</label>
+        <div class="tf-grid" id="tf-container">
+            <div class="tf-btn" data-tf="3 sec">3 sec</div>
+            <div class="tf-btn active" data-tf="5 sec">5 sec</div>
+            <div class="tf-btn" data-tf="15 sec">15 sec</div>
+            <div class="tf-btn" data-tf="30 sec">30 sec</div>
+            <div class="tf-btn" data-tf="1 min">1 min</div>
+            <div class="tf-btn" data-tf="2 min">2 min</div>
         </div>
     </div>
 
-    <div id="instructionText" class="instruction">Open HIGHER for 5 seconds</div>
-
-    <div class="grid">
-        <div class="card"><div class="card-label">Trend - 1h</div><div id="trendVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">Support</div><div id="supportVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">Move over 5 sec</div><div id="moveVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">Momentum</div><div id="momVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">Session</div><div id="sessVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">EMA 50/200</div><div id="emaVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">Price at level</div><div id="levelVal" class="card-val">--</div></div>
-        <div class="card"><div class="card-label">RSI</div><div id="rsiVal" class="card-val">--</div></div>
+    <!-- Ekran Analiz -->
+    <div class="status-box">
+        <div class="status-title" id="status-title">Ready to Scan</div>
+        <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
     </div>
 
-    <button class="btn-refresh" id="btnRefresh" onclick="fetchSignal()">⚡ Get signal</button>
+    <div class="signal-action" id="signal-action"></div>
+
+    <!-- 8 Analiz yo -->
+    <div class="readings-header">
+        <span>Readings • market analysis</span>
+        <span id="scan-counter">0 of 8</span>
+    </div>
+
+    <div class="grid-8">
+        <div class="reading-card" id="card-1">
+            <div class="reading-label">Trend - 1h</div>
+            <div class="reading-val" id="val-trend">-</div>
+        </div>
+        <div class="reading-card" id="card-2">
+            <div class="reading-label">Support</div>
+            <div class="reading-val" id="val-support">-</div>
+        </div>
+        <div class="reading-card" id="card-3">
+            <div class="reading-label" id="lbl-move">Move over 5 sec</div>
+            <div class="reading-val" id="val-move">-</div>
+        </div>
+        <div class="reading-card" id="card-4">
+            <div class="reading-label">Momentum</div>
+            <div class="reading-val" id="val-momentum">-</div>
+        </div>
+        <div class="reading-card" id="card-5">
+            <div class="reading-label">Session</div>
+            <div class="reading-val" id="val-session">-</div>
+        </div>
+        <div class="reading-card" id="card-6">
+            <div class="reading-label">EMA 50/200</div>
+            <div class="reading-val" id="val-ema">-</div>
+        </div>
+        <div class="reading-card" id="card-7">
+            <div class="reading-label">Price at level</div>
+            <div class="reading-val" id="val-price">-</div>
+        </div>
+        <div class="reading-card" id="card-8">
+            <div class="reading-label">RSI</div>
+            <div class="reading-val" id="val-rsi">-</div>
+        </div>
+    </div>
+
+    <button class="btn-orange" id="get-signal-btn" onclick="startAnalysis()">⚡ Get signal</button>
 
     <script>
-        const SECRET_CODE = "Alibourchet2026"; // Ou ka chanje kòd sa a nenpòt lè
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+        }
 
-        function verifyCode() {
-            const enteredCode = document.getElementById('accessCode').value;
-            const errorText = document.getElementById('errorMsg');
-            if (enteredCode === SECRET_CODE) {
-                document.getElementById('authScreen').style.display = 'none';
-                localStorage.setItem('bot_auth', 'true');
+        let selectedTimeframe = "5 sec";
+
+        // Jere bouton timeframe yo
+        document.querySelectorAll('.tf-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTimeframe = btn.getAttribute('data-tf');
+                document.getElementById('lbl-move').innerText = `Move over ${selectedTimeframe}`;
+            });
+        });
+
+        // Kòd sekirite (ou ka antre nenpòt kòd oswa mete pa w la)
+        function unlockApp() {
+            const code = document.getElementById('secret-code').value.trim();
+            if (code.length > 0) {
+                document.getElementById('auth-screen').style.display = 'none';
             } else {
-                errorText.innerText = "Kòd la pa kòrèk! Eseye ankò.";
-                document.getElementById('accessCode').value = '';
+                alert("Tanpri antre kòd sekrè w la.");
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('bot_auth') === 'true') {
-                document.getElementById('authScreen').style.display = 'none';
-            }
-        });
+        async function startAnalysis() {
+            const btn = document.getElementById('get-signal-btn');
+            const pair = document.getElementById('pair-select').value;
+            const statusTitle = document.getElementById('status-title');
+            const statusSub = document.getElementById('status-sub');
+            const signalAction = document.getElementById('signal-action');
+            const counter = document.getElementById('scan-counter');
 
-        async function fetchSignal() {
-            const card = document.getElementById('signalCard');
-            const content = document.getElementById('signalContent');
-            const btn = document.getElementById('btnRefresh');
-            
-            content.style.display = 'none';
-            if (!document.getElementById('loadingState')) {
-                const loadingDiv = document.createElement('div');
-                loadingDiv.id = 'loadingState';
-                loadingDiv.innerHTML = `<div style="font-size: 18px; font-weight: bold; color: #f97316; margin-bottom: 5px;">Analyzing...</div><div style="font-size: 12px; color: #8b949e;">⚡ Measuring momentum...</div>`;
-                card.appendChild(loadingDiv);
-            }
             btn.disabled = true;
+            signalAction.innerText = "";
+            statusTitle.innerText = "Analyzing...";
+            statusTitle.style.color = "#f97316";
 
-            const pair = document.getElementById('pairSelect').value;
+            // Reyajiste 8 bwat yo
+            const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
+            valIds.forEach(id => document.getElementById(id).innerText = "...");
+
             try {
-                await new Promise(resolve => setTimeout(resolve, 1200));
-                const response = await fetch(`http://127.0.0.1:8000/api/signal?pair=${encodeURIComponent(pair)}`);
-                const data = await response.json();
+                const res = await fetch(`/api/signal?pair=${encodeURIComponent(pair)}&timeframe=${encodeURIComponent(selectedTimeframe)}`);
+                const data = await res.json();
 
-                const loader = document.getElementById('loadingState');
-                if (loader) loader.remove();
-                content.style.display = 'block';
+                const values = [
+                    data.trend,
+                    data.support,
+                    data.move,
+                    data.momentum,
+                    data.session,
+                    data.ema,
+                    data.price_level,
+                    data.rsi
+                ];
 
-                const sigEl = document.getElementById('signalText');
-                sigEl.innerText = data.signal;
-                sigEl.className = data.signal === 'HIGHER' ? 'signal-title' : 'signal-title lower';
+                // Efè eskanè 1 of 8 rive 8 of 8
+                for (let i = 0; i < 8; i++) {
+                    const card = document.getElementById(`card-${i + 1}`);
+                    card.classList.add('active-scan');
+                    counter.innerText = `${i + 1} of 8`;
+                    statusSub.innerText = `⚡ Analyzing step ${i + 1} of 8...`;
+                    
+                    await new Promise(r => setTimeout(r, 220));
+                    
+                    document.getElementById(valIds[i]).innerText = values[i];
+                    card.classList.remove('active-scan');
+                }
 
-                document.getElementById('instructionText').innerText = `Open ${data.signal} for 5 seconds`;
-                document.getElementById('trendVal').innerText = data.trend_1h;
-                document.getElementById('supportVal').innerText = data.support;
-                document.getElementById('moveVal').innerText = data.move_5s;
-                document.getElementById('momVal').innerText = data.momentum;
-                document.getElementById('sessVal').innerText = data.session;
-                document.getElementById('emaVal').innerText = data.ema;
-                document.getElementById('levelVal').innerText = data.price_level;
-                document.getElementById('rsiVal').innerText = data.rsi;
-            } catch (error) {
-                console.error("Erè:", error);
+                // Afiche rezilta final la
+                statusTitle.innerText = data.direction === "HIGHER" ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
+                statusTitle.style.color = data.direction === "HIGHER" ? "#22c55e" : "#ef4444";
+                statusSub.innerText = `${pair} • ${selectedTimeframe}`;
+                
+                signalAction.innerText = data.signal_text;
+                signalAction.className = data.direction === "HIGHER" ? "signal-action" : "signal-action down";
+
+            } catch (err) {
+                statusTitle.innerText = "Connection Error";
+                statusSub.innerText = "Tcheke koneksyon sèvè a.";
             } finally {
                 btn.disabled = false;
             }
