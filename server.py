@@ -1,3 +1,4 @@
+from fastapi.responses import FileResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -6,7 +7,9 @@ import yfinance as yf
 from datetime import datetime
 
 app = FastAPI()
-
+@app.get("/")
+async def read_index():
+    return FileResponse("index.html")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
