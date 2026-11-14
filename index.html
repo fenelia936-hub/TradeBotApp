@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Bot Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #0d1112; color: #ffffff; font-family: sans-serif; margin: 0; padding: 16px; }
+        .header { text-align: center; font-size: 14px; color: #8b949e; margin-bottom: 10px; }
+        .pair-box { background: #161b1d; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .signal-card { background: linear-gradient(135deg, #16241d 0%, #111618 100%); border: 1px solid #234232; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
+        .signal-title { font-size: 28px; font-weight: bold; color: #4ade80; margin: 0; }
+        .signal-title.lower { color: #f87171; }
+        .instruction { text-align: center; color: #f59e0b; font-size: 13px; margin-bottom: 16px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .card { background: #161b1d; padding: 12px; border-radius: 12px; }
+        .card-label { font-size: 11px; color: #8b949e; }
+        .card-val { font-size: 13px; font-weight: 600; margin-top: 4px; color: #e2e8f0; }
+        .red { color: #f87171; }
+        .green { color: #4ade80; }
+        .btn-refresh { width: 100%; background: #f97316; color: #000; font-weight: bold; border: none; padding: 14px; border-radius: 12px; font-size: 15px; cursor: pointer; }
+        
+        /* Ekran Modpas Prive */
+        #authScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #0d1112; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999; padding: 20px; box-sizing: border-box;
+        }
+        .auth-box { background: #161b1d; padding: 24px; border-radius: 16px; border: 1px solid #30363d; width: 100%; max-width: 320px; text-align: center; }
+        .auth-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1112; color: #fff; font-size: 16px; text-align: center; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+        .auth-btn { width: 100%; background: #f97316; color: #000; font-weight: bold; border: none; padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- Ekran Modpas Prive -->
+    <div id="authScreen">
+        <div class="auth-box">
+            <h3 style="color: #fff; margin-top: 0; margin-bottom: 8px;">Aksè Restrikte 🔒</h3>
+            <p style="color: #8b949e; font-size: 12px; margin-bottom: 20px;">Antre kòd sekrè w la pou w ka itilize bot la.</p>
+            <input type="password" id="accessCode" class="auth-input" placeholder="Antre kòd la...">
+            <button class="auth-btn" onclick="verifyCode()">Desann / Louvri</button>
+            <p id="errorMsg" style="color: #f87171; font-size: 12px; margin-top: 10px; height: 15px;"></p>
+        </div>
+    </div>
+
+    <div class="header">Trade Bot • mini app</div>
+    
+    <div class="pair-box">
+        <select id="pairSelect" style="background:transparent; color:white; border:none; font-size:16px; font-weight:bold;">
+            <option value="EUR/USD">EUR/USD</option>
+            <option value="GBP/USD">GBP/USD</option>
+            <option value="USD/JPY">USD/JPY</option>
+        </select>
+        <span style="font-size:12px; color:#8b949e;">OTC • 5 sec</span>
+    </div>
+
+    <div class="signal-card" id="signalCard">
+        <div id="signalContent">
+            <p id="signalText" class="signal-title">HIGHER</p>
+            <span style="font-size:12px; color:#8b949e;">Entry window active</span>
+        </div>
+    </div>
+
+    <div id="instructionText" class="instruction">Open HIGHER for 5 seconds</div>
+
+    <div class="grid">
+        <div class="card"><div class="card-label">Trend - 1h</div><div id="trendVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">Support</div><div id="supportVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">Move over 5 sec</div><div id="moveVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">Momentum</div><div id="momVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">Session</div><div id="sessVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">EMA 50/200</div><div id="emaVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">Price at level</div><div id="levelVal" class="card-val">--</div></div>
+        <div class="card"><div class="card-label">RSI</div><div id="rsiVal" class="card-val">--</div></div>
+    </div>
+
+    <button class="btn-refresh" id="btnRefresh" onclick="fetchSignal()">⚡ Get signal</button>
+
+    <script>
+        const SECRET_CODE = "Alibourchet2026"; // Ou ka chanje kòd sa a nenpòt lè
+
+        function verifyCode() {
+            const enteredCode = document.getElementById('accessCode').value;
+            const errorText = document.getElementById('errorMsg');
+            if (enteredCode === SECRET_CODE) {
+                document.getElementById('authScreen').style.display = 'none';
+                localStorage.setItem('bot_auth', 'true');
+            } else {
+                errorText.innerText = "Kòd la pa kòrèk! Eseye ankò.";
+                document.getElementById('accessCode').value = '';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('bot_auth') === 'true') {
+                document.getElementById('authScreen').style.display = 'none';
+            }
+        });
+
+        async function fetchSignal() {
+            const card = document.getElementById('signalCard');
+            const content = document.getElementById('signalContent');
+            const btn = document.getElementById('btnRefresh');
+            
+            content.style.display = 'none';
+            if (!document.getElementById('loadingState')) {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loadingState';
+                loadingDiv.innerHTML = `<div style="font-size: 18px; font-weight: bold; color: #f97316; margin-bottom: 5px;">Analyzing...</div><div style="font-size: 12px; color: #8b949e;">⚡ Measuring momentum...</div>`;
+                card.appendChild(loadingDiv);
+            }
+            btn.disabled = true;
+
+            const pair = document.getElementById('pairSelect').value;
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                const response = await fetch(`http://127.0.0.1:8000/api/signal?pair=${encodeURIComponent(pair)}`);
+                const data = await response.json();
+
+                const loader = document.getElementById('loadingState');
+                if (loader) loader.remove();
+                content.style.display = 'block';
+
+                const sigEl = document.getElementById('signalText');
+                sigEl.innerText = data.signal;
+                sigEl.className = data.signal === 'HIGHER' ? 'signal-title' : 'signal-title lower';
+
+                document.getElementById('instructionText').innerText = `Open ${data.signal} for 5 seconds`;
+                document.getElementById('trendVal').innerText = data.trend_1h;
+                document.getElementById('supportVal').innerText = data.support;
+                document.getElementById('moveVal').innerText = data.move_5s;
+                document.getElementById('momVal').innerText = data.momentum;
+                document.getElementById('sessVal').innerText = data.session;
+                document.getElementById('emaVal').innerText = data.ema;
+                document.getElementById('levelVal').innerText = data.price_level;
+                document.getElementById('rsiVal').innerText = data.rsi;
+            } catch (error) {
+                console.error("Erè:", error);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
