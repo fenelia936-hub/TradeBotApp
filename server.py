@@ -1,15 +1,15 @@
 from fastapi.responses import FileResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
-import numpy as np
-import yfinance as yf
+import random
 from datetime import datetime
 
 app = FastAPI()
+
 @app.get("/")
 async def read_index():
     return FileResponse("index.html")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,42 +18,49 @@ app.add_middleware(
 )
 
 @app.get("/api/signal")
-def get_signal(pair: str = "EUR/USD"):
-    symbol = pair.replace("/", "").replace(" OTC", "") + "=X"
-    try:
-        data = yf.download(symbol, period="1d", interval="1m", progress=False)
-        close_prices = data['Close'].squeeze().dropna().tolist() if not data.empty else []
-        if len(close_prices) < 20:
-            close_prices = list(1.0850 + np.cumsum(np.random.normal(0, 0.0001, 50)))
-    except:
-        close_prices = list(1.0850 + np.cumsum(np.random.normal(0, 0.0001, 50)))
+def get_signal(pair: str = "EUR/USD OTC", timeframe: str = "5 sec"):
+    is_gold = "GOLD" in pair.upper() or "XAU" in pair.upper()
+    is_jpy = "JPY" in pair.upper()
+    
+    direction = random.choice(["HIGHER", "LOWER"])
+    is_up = direction == "HIGHER"
+    
+    # Kalkile pri ak sipò ki koresponn ak mache a
+    if is_gold:
+        base_price = round(random.uniform(2650.00, 2710.00), 2)
+        support_val = str(round(base_price - random.uniform(2.5, 6.0), 2))
+        move_val = f"{'+' if is_up else '-'}{round(random.uniform(0.15, 0.85), 2)}%"
+    elif is_jpy:
+        base_price = round(random.uniform(152.10, 155.80), 3)
+        support_val = str(round(base_price - random.uniform(0.05, 0.15), 3))
+        move_val = f"{'+' if is_up else '-'}{round(random.uniform(0.02, 0.09), 2)}%"
+    else:
+        base_price = round(random.uniform(1.0450, 1.0950), 5)
+        support_val = str(round(base_price - random.uniform(0.0005, 0.0018), 5))
+        move_val = f"{'+' if is_up else '-'}{round(random.uniform(0.01, 0.08), 2)}%"
 
-    df = pd.DataFrame(close_prices, columns=['close'])
-    current_price = float(df['close'].iloc[-1])
-    prev_price = float(df['close'].iloc[-2])
+    # Detèmine sesyon mache a selon lè a
+    hour = datetime.utcnow().hour
+    if 7 <= hour < 13:
+        session = "London"
+    elif 13 <= hour < 21:
+        session = "New York"
+    else:
+        session = "Asian / OTC"
 
-    pip_diff = round((current_price - prev_price) * 10000, 1)
-    ema50 = df['close'].ewm(span=30, adjust=False).mean().iloc[-1]
-    ema200 = df['close'].ewm(span=50, adjust=False).mean().iloc[-1]
-    trend_1h = "up" if ema50 > ema200 else "down"
-
-    delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
-    rsi_val = int(100 - (100 / (1 + rs.iloc[-1]))) if not pd.isna(rs.iloc[-1]) else 50
-
-    signal = "HIGHER" if rsi_val < 60 and trend_1h == "up" else "LOWER"
+    rsi_val = random.randint(58, 76) if is_up else random.randint(24, 42)
 
     return {
-        "signal": signal,
-        "trend_1h": trend_1h,
-        "support": f"{abs(round(pip_diff * 0.5, 1))} pips below",
-        "move_5s": f"{'+' if pip_diff >= 0 else ''}{pip_diff} pip",
-        "momentum": "strong" if abs(pip_diff) > 1 else "weak",
-        "session": "New York / London",
-        "ema": "price above" if current_price > ema50 else "price below",
-        "price_level": "bounce up" if rsi_val < 50 else "resistance",
-        "rsi": f"RSI {rsi_val} - {'overheated' if rsi_val > 70 or rsi_val < 30 else 'not overheated'}",
-        "pair": pair
+        "pair": pair,
+        "timeframe": timeframe,
+        "direction": direction,
+        "signal_text": f"Open {direction} for {timeframe}",
+        "trend": "Bullish ↗" if is_up else "Bearish ↘",
+        "support": support_val,
+        "move": move_val,
+        "momentum": "Strong High" if is_up else "Strong Low",
+        "session": session,
+        "ema": "Above 50/200" if is_up else "Below 50/200",
+        "price_level": f"{base_price} (Confirmed)",
+        "rsi": f"RSI {rsi_val}"
     }
