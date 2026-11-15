@@ -84,6 +84,7 @@
 </head>
 <body>
 
+    <!-- Aksè Restrikte nan Kreyòl -->
     <div id="auth-screen">
         <div class="auth-box">
             <h2>Aksè Restrikte 🔒</h2>
@@ -119,7 +120,7 @@
         </div>
     </div>
 
-    <!-- Pair Selection Card -->
+    <!-- Pair Selection Card (Tout pè OTC, Non-OTC, ak Lò) -->
     <div class="card">
         <div class="pair-display">
             <div class="pair-info">
@@ -127,17 +128,35 @@
                 <p>Euro / Dollar</p>
             </div>
             <select id="pair-select" style="background: #2c2c2e; color: #fff; border: 1px solid #3a3a3c; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;" onchange="updatePairLabel()">
-                <option value="EUR/USD OTC">EUR/USD OTC</option>
-                <option value="GBP/USD OTC">GBP/USD OTC</option>
-                <option value="USD/JPY OTC">USD/JPY OTC</option>
-                <option value="AUD/USD OTC">AUD/USD OTC</option>
-                <option value="USD/CAD OTC">USD/CAD OTC</option>
-                <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
+                <optgroup label="🔥 Tout Pè Pocket Option OTC">
+                    <option value="EUR/USD OTC">EUR/USD OTC</option>
+                    <option value="GBP/USD OTC">GBP/USD OTC</option>
+                    <option value="USD/JPY OTC">USD/JPY OTC</option>
+                    <option value="AUD/USD OTC">AUD/USD OTC</option>
+                    <option value="USD/CAD OTC">USD/CAD OTC</option>
+                    <option value="USD/CHF OTC">USD/CHF OTC</option>
+                    <option value="EUR/GBP OTC">EUR/GBP OTC</option>
+                    <option value="EUR/JPY OTC">EUR/JPY OTC</option>
+                    <option value="GBP/JPY OTC">GBP/JPY OTC</option>
+                    <option value="AUD/CAD OTC">AUD/CAD OTC</option>
+                    <option value="NZD/USD OTC">NZD/USD OTC</option>
+                </optgroup>
+                <optgroup label="🥇 Metal (Lò / Gold)">
+                    <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
+                    <option value="GOLD (XAU/USD)">GOLD (XAU/USD)</option>
+                </optgroup>
+                <optgroup label="🌍 Forex Mache Reyèl (Non-OTC)">
+                    <option value="EUR/USD">EUR/USD</option>
+                    <option value="GBP/USD">GBP/USD</option>
+                    <option value="USD/JPY">USD/JPY</option>
+                    <option value="AUD/USD">AUD/USD</option>
+                    <option value="USD/CAD">USD/CAD</option>
+                </optgroup>
             </select>
         </div>
     </div>
 
-    <!-- Trade Time & Market Type -->
+    <!-- Trade Time & Market Type (Avèk 3 sec, 5 sec, elatriye) -->
     <div class="card">
         <div class="market-type-row">
             <label style="margin: 0; font-size: 12px; color: #8e8e93;">Trade time</label>
@@ -147,14 +166,14 @@
             </div>
         </div>
         <div class="tf-grid" id="tf-container">
-            <div class="tf-btn" data-tf="3 sec">3 sec</div>
+            <div class="tf-btn active" data-tf="3 sec">3 sec</div>
+            <div class="tf-btn" data-tf="5 sec">5 sec</div>
             <div class="tf-btn" data-tf="10 sec">10 sec</div>
             <div class="tf-btn" data-tf="15 sec">15 sec</div>
-            <div class="tf-btn active" data-tf="1 min">1 min</div>
+            <div class="tf-btn" data-tf="30 sec">30 sec</div>
+            <div class="tf-btn" data-tf="1 min">1 min</div>
             <div class="tf-btn" data-tf="3 min">3 min</div>
             <div class="tf-btn" data-tf="5 min">5 min</div>
-            <div class="tf-btn" data-tf="30 min">30 min</div>
-            <div class="tf-btn" data-tf="1 hour">1 hour</div>
         </div>
     </div>
 
@@ -181,6 +200,7 @@
     <div class="status-box">
         <div class="status-title" id="status-title">Ready to Scan</div>
         <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
+        <!-- Revèy 10 segond -->
         <div id="countdown-display" style="font-size: 18px; font-weight: 700; color: #f97316; margin-top: 6px; display: none;"></div>
     </div>
 
@@ -194,192 +214,3 @@
 
     <!-- 8 Readings Grid -->
     <div class="grid-8">
-        <div class="reading-card" id="card-1">
-            <div class="reading-label">📈 Trend - 1h</div>
-            <div class="reading-val" id="val-trend">-</div>
-        </div>
-        <div class="reading-card" id="card-2">
-            <div class="reading-label">🛡️ Support</div>
-            <div class="reading-val" id="val-support">-</div>
-        </div>
-        <div class="reading-card" id="card-3">
-            <div class="reading-label" id="lbl-move">Move over 1 min</div>
-            <div class="reading-val" id="val-move">-</div>
-        </div>
-        <div class="reading-card" id="card-4">
-            <div class="reading-label">⚡ Momentum</div>
-            <div class="reading-val" id="val-momentum">-</div>
-        </div>
-        <div class="reading-card" id="card-5">
-            <div class="reading-label">🌍 Session</div>
-            <div class="reading-val" id="val-session">-</div>
-        </div>
-        <div class="reading-card" id="card-6">
-            <div class="reading-label">📊 EMA 50/200</div>
-            <div class="reading-val" id="val-ema">-</div>
-        </div>
-        <div class="reading-card" id="card-7">
-            <div class="reading-label">💎 Price at level</div>
-            <div class="reading-val" id="val-price">-</div>
-        </div>
-        <div class="reading-card" id="card-8">
-            <div class="reading-label">📉 RSI</div>
-            <div class="reading-val" id="val-rsi">-</div>
-        </div>
-    </div>
-
-    <button class="btn-orange" id="get-signal-btn" onclick="startAnalysis()">⚡ Get signal</button>
-
-    <!-- Bottom Navigation Bar -->
-    <div class="bottom-nav">
-        <div class="nav-item">
-            <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
-            <div>Today</div>
-        </div>
-        <div class="nav-item active">
-            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-            <div>Signal</div>
-        </div>
-        <div class="nav-item">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-            <div>Profile</div>
-        </div>
-    </div>
-
-    <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.expand();
-        }
-
-        let selectedTimeframe = "1 min";
-        let selectedAIModel = "Fable 5.1";
-
-        document.querySelectorAll('.tf-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedTimeframe = btn.getAttribute('data-tf');
-                document.getElementById('lbl-move').innerText = `Move over ${selectedTimeframe}`;
-            });
-        });
-
-        function selectAI(element) {
-            document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-            selectedAIModel = element.getAttribute('data-ai');
-        }
-
-        function selectPairQuick(pairName) {
-            document.querySelectorAll('.top-card').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.getElementById('pair-select').value = pairName;
-            updatePairLabel();
-        }
-
-        function updatePairLabel() {
-            const val = document.getElementById('pair-select').value;
-            document.getElementById('current-pair-title').innerText = val;
-        }
-
-        function unlockApp() {
-            const code = document.getElementById('secret-code').value.trim();
-            if (code.length > 0) {
-                document.getElementById('auth-screen').style.display = 'none';
-            } else {
-                alert("Tanpri antre kòd sekrè w la.");
-            }
-        }
-
-        async function startAnalysis() {
-            const btn = document.getElementById('get-signal-btn');
-            const pair = document.getElementById('pair-select').value;
-            const statusTitle = document.getElementById('status-title');
-            const statusSub = document.getElementById('status-sub');
-            const signalAction = document.getElementById('signal-action');
-            const counter = document.getElementById('scan-counter');
-            const countdownEl = document.getElementById('countdown-display');
-
-            btn.disabled = true;
-            signalAction.innerText = "";
-            countdownEl.style.display = 'none';
-            statusTitle.innerText = "Executing Market...";
-            statusTitle.style.color = "#f97316";
-
-            const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
-            
-            for (let i = 1; i <= 8; i++) {
-                const c = document.getElementById(`card-${i}`);
-                c.className = "reading-card";
-                document.getElementById(valIds[i-1]).innerText = "...";
-                document.getElementById(valIds[i-1]).className = "reading-val";
-            }
-
-            try {
-                const res = await fetch(`/api/signal?pair=${encodeURIComponent(pair)}&timeframe=${encodeURIComponent(selectedTimeframe)}`);
-                const data = await res.json();
-
-                const values = [
-                    data.trend,
-                    data.support,
-                    data.move,
-                    data.momentum,
-                    data.session,
-                    data.ema,
-                    data.price_level,
-                    data.rsi
-                ];
-
-                const isUp = data.direction === "HIGHER";
-
-                for (let i = 0; i < 8; i++) {
-                    const card = document.getElementById(`card-${i + 1}`);
-                    card.classList.add('scanning');
-                    counter.innerText = `${i + 1} of 8`;
-                    statusSub.innerText = `⚡ ${selectedAIModel} fetching quote • step ${i + 1} of 8...`;
-                    
-                    await new Promise(r => setTimeout(r, 350));
-                    
-                    card.classList.remove('scanning');
-                    card.classList.add(isUp ? 'success-green' : 'success-red');
-                    
-                    const valEl = document.getElementById(valIds[i]);
-                    valEl.innerText = values[i];
-                    valEl.classList.add(isUp ? 'green' : 'red');
-                }
-
-                statusTitle.innerText = isUp ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
-                statusTitle.style.color = isUp ? "#22c55e" : "#ef4444";
-                statusSub.innerText = `${pair} • ${selectedTimeframe} (${selectedAIModel})`;
-                
-                signalAction.innerText = data.signal_text;
-                signalAction.className = isUp ? "signal-action" : "signal-action down";
-
-                // Revèy dekont pou antre nan pozisyon
-                countdownEl.style.display = 'block';
-                let timeLeft = 10;
-                if (selectedTimeframe.includes("sec")) {
-                    timeLeft = parseInt(selectedTimeframe) || 10;
-                } else {
-                    timeLeft = 15;
-                }
-
-                const timerInterval = setInterval(() => {
-                    if (timeLeft > 0) {
-                        countdownEl.innerText = `⏳ Antre nan pozisyon nan: ${timeLeft}s`;
-                        timeLeft--;
-                    } else {
-                        countdownEl.innerText = `🚀 Klike kounye a! (${selectedTimeframe})`;
-                        clearInterval(timerInterval);
-                    }
-                }, 1000);
-
-            } catch (err) {
-                statusTitle.innerText = "Connection Error";
-                statusSub.innerText = "Tcheke koneksyon sèvè a.";
-            } finally {
-                btn.disabled = false;
-            }
-        }
-    </script>
-</body>
-</html>
