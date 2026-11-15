@@ -19,11 +19,10 @@ async def read_index():
     return FileResponse("index.html")
 
 @app.get("/api/signal")
-async def get_signal(pair: str = "EUR/USD OTC", timeframe: str = "1 min"):
+async def get_signal(pair: str = "EUR/USD OTC", timeframe: str = "3 sec"):
     is_gold = "GOLD" in pair.upper() or "XAU" in pair.upper()
     is_jpy = "JPY" in pair.upper()
     
-    # Ale chache vrè pri reyèl la nan mache a atravè API to echanj piblik la
     real_price = 1.0520
     try:
         async with httpx.AsyncClient() as client:
@@ -59,11 +58,11 @@ async def get_signal(pair: str = "EUR/USD OTC", timeframe: str = "1 min"):
 
     hour = datetime.utcnow().hour
     if 7 <= hour < 13:
-        session = "London (Active Market)"
+        session = "London (Real Market Active)"
     elif 13 <= hour < 21:
-        session = "New York (Active Market)"
+        session = "New York (Real Market Active)"
     else:
-        session = "Global / OTC Market"
+        session = "Global / OTC Session"
 
     rsi_val = random.randint(55, 74) if is_up else random.randint(26, 45)
 
