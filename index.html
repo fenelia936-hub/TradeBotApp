@@ -3,34 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trade Bot Mini App</title>
+    <title>Claude Trade Bot Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #121212; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
+        body { background-color: #121212; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 70px; }
         
         #auth-screen { position: fixed; inset: 0; background: #121212; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
         .auth-box { background: #1c1c1e; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #2c2c2e; }
         .auth-box h2 { margin-bottom: 8px; font-size: 20px; }
         .auth-box p { color: #8e8e93; font-size: 14px; margin-bottom: 20px; }
         .auth-box input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #3a3a3c; background: #2c2c2e; color: white; font-size: 16px; margin-bottom: 14px; text-align: center; }
-        
-        .header { text-align: center; margin-bottom: 16px; }
-        .header span { color: #8e8e93; font-size: 13px; }
-        
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .app-title { font-size: 24px; font-weight: 700; }
+        .lang-badge { background: #1c1c1e; border: 1px solid #2c2c2e; padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #d1d1d6; display: flex; align-items: center; gap: 6px; }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+        .section-header .see-all { color: #f97316; text-decoration: none; font-weight: 600; cursor: pointer; }
+
+        /* Top Today Horizontal Scroll */
+        .top-today-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 4px; scrollbar-width: none; }
+        .top-today-scroll::-webkit-scrollbar { display: none; }
+        .top-card { background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; padding: 10px 14px; min-width: 100px; flex-shrink: 0; cursor: pointer; transition: 0.2s; }
+        .top-card.active { border-color: #f97316; background: rgba(249, 115, 22, 0.08); }
+        .top-card-pair { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .top-card-status { font-size: 11px; color: #22c55e; }
+        .top-card-status.low { color: #f97316; }
+
         .card { background: #1c1c1e; border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid #2c2c2e; }
-        label { display: block; font-size: 12px; color: #8e8e93; margin-bottom: 6px; }
-        
-        select { width: 100%; background: #2c2c2e; color: #ffffff; border: 1px solid #3a3a3c; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; outline: none; }
-        
-        .tf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-        .tf-btn { background: #2c2c2e; border: 1px solid #3a3a3c; color: #d1d1d6; padding: 10px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
+        .pair-display { display: flex; justify-content: space-between; align-items: center; }
+        .pair-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+        .pair-info p { font-size: 11px; color: #8e8e93; }
+
+        .market-type-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .type-toggles { display: flex; background: #2c2c2e; border-radius: 8px; padding: 2px; }
+        .type-btn { background: transparent; border: none; color: #8e8e93; padding: 4px 12px; font-size: 11px; font-weight: 600; border-radius: 6px; cursor: pointer; }
+        .type-btn.active { background: #1c1c1e; color: #ffffff; }
+
+        /* Timeframe Grid */
+        .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+        .tf-btn { background: #2c2c2e; border: 1px solid #3a3a3c; color: #d1d1d6; padding: 10px 4px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
         .tf-btn.active { background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316; }
 
-        .status-box { background: linear-gradient(145deg, #1e241e, #181c18); border: 1px solid #2e3b2e; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
-        .status-title { font-size: 22px; font-weight: 700; color: #f97316; margin-bottom: 6px; }
-        .status-sub { font-size: 13px; color: #a1a1aa; }
-        .signal-action { font-size: 17px; font-weight: 700; margin: 12px 0; text-align: center; color: #22c55e; }
+        /* AI Models Grid */
+        .ai-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .ai-card { background: #2c2c2e; border: 1px solid #3a3a3c; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .ai-card.active { border-color: #f97316; background: rgba(249, 115, 22, 0.1); }
+        .ai-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+        .ai-desc { font-size: 10px; color: #8e8e93; }
+
+        .status-box { background: linear-gradient(145deg, #1e241e, #181c18); border: 1px solid #2e3b2e; border-radius: 16px; padding: 16px; text-align: center; margin-bottom: 12px; }
+        .status-title { font-size: 20px; font-weight: 700; color: #f97316; margin-bottom: 4px; }
+        .status-sub { font-size: 12px; color: #a1a1aa; }
+        .signal-action { font-size: 16px; font-weight: 700; margin: 8px 0; text-align: center; color: #22c55e; }
         .signal-action.down { color: #ef4444; }
 
         .readings-header { display: flex; justify-content: space-between; font-size: 12px; color: #8e8e93; margin-bottom: 8px; padding: 0 4px; }
@@ -41,13 +67,19 @@
         .reading-card.success-green { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); }
         .reading-card.success-red { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
         
-        .reading-label { font-size: 11px; color: #8e8e93; margin-bottom: 4px; }
+        .reading-label { font-size: 11px; color: #8e8e93; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
         .reading-val { font-size: 13px; font-weight: 600; color: #ffffff; }
         .reading-val.green { color: #22c55e; }
         .reading-val.red { color: #ef4444; }
 
-        .btn-orange { width: 100%; background: #f97316; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: auto; }
+        .btn-orange { width: 100%; background: #f97316; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; }
         .btn-orange:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Bottom Navbar */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1c1c1e; border-top: 1px solid #2c2c2e; display: flex; justify-content: space-around; padding: 10px 0; z-index: 50; }
+        .nav-item { text-align: center; color: #8e8e93; font-size: 10px; cursor: pointer; }
+        .nav-item.active { color: #f97316; }
+        .nav-item svg { width: 22px; height: 22px; margin-bottom: 2px; fill: currentColor; }
     </style>
 </head>
 <body>
@@ -61,108 +93,166 @@
         </div>
     </div>
 
-    <div class="header">
-        <span>Trade Bot • mini app</span>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="app-title">Signal</div>
+        <div class="lang-badge">🌐 English ▾</div>
     </div>
 
+    <!-- Top Today Section -->
+    <div class="section-header">
+        <span>Top today</span>
+        <span class="see-all">All 16 &gt;</span>
+    </div>
+    <div class="top-today-scroll">
+        <div class="top-card" onclick="selectPairQuick('USD/CAD OTC')">
+            <div class="top-card-pair">USD/CAD</div>
+            <div class="top-card-status">⚡ medium</div>
+        </div>
+        <div class="top-card active" onclick="selectPairQuick('EUR/USD OTC')">
+            <div class="top-card-pair">EUR/USD</div>
+            <div class="top-card-status">⚡ medium</div>
+        </div>
+        <div class="top-card" onclick="selectPairQuick('AUD/USD OTC')">
+            <div class="top-card-pair">AUD/USD</div>
+            <div class="top-card-status low">⚡ low</div>
+        </div>
+    </div>
+
+    <!-- Pair Selection Card -->
     <div class="card">
-        <label>Chwazi Pè / Mache (OTC • Gold • Forex)</label>
-        <select id="pair-select">
-            <optgroup label="🔥 Tout Pè Pocket Option OTC">
+        <div class="pair-display">
+            <div class="pair-info">
+                <h3 id="current-pair-title">EUR/USD OTC</h3>
+                <p>Euro / Dollar</p>
+            </div>
+            <select id="pair-select" style="background: #2c2c2e; color: #fff; border: 1px solid #3a3a3c; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;" onchange="updatePairLabel()">
                 <option value="EUR/USD OTC">EUR/USD OTC</option>
                 <option value="GBP/USD OTC">GBP/USD OTC</option>
                 <option value="USD/JPY OTC">USD/JPY OTC</option>
                 <option value="AUD/USD OTC">AUD/USD OTC</option>
                 <option value="USD/CAD OTC">USD/CAD OTC</option>
-                <option value="USD/CHF OTC">USD/CHF OTC</option>
-                <option value="EUR/GBP OTC">EUR/GBP OTC</option>
-                <option value="EUR/JPY OTC">EUR/JPY OTC</option>
-                <option value="GBP/JPY OTC">GBP/JPY OTC</option>
-                <option value="AUD/CAD OTC">AUD/CAD OTC</option>
-                <option value="NZD/USD OTC">NZD/USD OTC</option>
-            </optgroup>
-            <optgroup label="🥇 Metal (Lò / Gold)">
                 <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
-                <option value="GOLD (XAU/USD)">GOLD (XAU/USD)</option>
-            </optgroup>
-            <optgroup label="🌍 Forex Mache Reyèl">
-                <option value="EUR/USD">EUR/USD</option>
-                <option value="GBP/USD">GBP/USD</option>
-                <option value="USD/JPY">USD/JPY</option>
-                <option value="AUD/USD">AUD/USD</option>
-                <option value="USD/CAD">USD/CAD</option>
-            </optgroup>
-        </select>
-    </div>
-
-    <div class="card">
-        <label>Trade time</label>
-        <div class="tf-grid" id="tf-container">
-            <div class="tf-btn" data-tf="3 sec">3 sec</div>
-            <div class="tf-btn" data-tf="5 sec">5 sec</div>
-            <div class="tf-btn active" data-tf="10 sec">10 sec</div>
-            <div class="tf-btn" data-tf="15 sec">15 sec</div>
-            <div class="tf-btn" data-tf="30 sec">30 sec</div>
-            <div class="tf-btn" data-tf="1 min">1 min</div>
+            </select>
         </div>
     </div>
 
+    <!-- Trade Time & Market Type -->
+    <div class="card">
+        <div class="market-type-row">
+            <label style="margin: 0; font-size: 12px; color: #8e8e93;">Trade time</label>
+            <div class="type-toggles">
+                <button class="type-btn active" id="btn-otc">OTC</button>
+                <button class="type-btn" id="btn-stock">Stock</button>
+            </div>
+        </div>
+        <div class="tf-grid" id="tf-container">
+            <div class="tf-btn" data-tf="3 sec">3 sec</div>
+            <div class="tf-btn" data-tf="10 sec">10 sec</div>
+            <div class="tf-btn" data-tf="15 sec">15 sec</div>
+            <div class="tf-btn active" data-tf="1 min">1 min</div>
+            <div class="tf-btn" data-tf="3 min">3 min</div>
+            <div class="tf-btn" data-tf="5 min">5 min</div>
+            <div class="tf-btn" data-tf="30 min">30 min</div>
+            <div class="tf-btn" data-tf="1 hour">1 hour</div>
+        </div>
+    </div>
+
+    <!-- AI Models Selection -->
+    <div class="card">
+        <label>AI Intelligence Engine</label>
+        <div class="ai-grid">
+            <div class="ai-card" data-ai="Sonnet 5" onclick="selectAI(this)">
+                <div class="ai-name">Sonnet 5</div>
+                <div class="ai-desc">Core</div>
+            </div>
+            <div class="ai-card" data-ai="Opus 5.5" onclick="selectAI(this)">
+                <div class="ai-name">Opus 5.5</div>
+                <div class="ai-desc">Market picture</div>
+            </div>
+            <div class="ai-card active" data-ai="Fable 5.1" onclick="selectAI(this)">
+                <div class="ai-name">Fable 5.1</div>
+                <div class="ai-desc">Like a pro</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Box -->
     <div class="status-box">
         <div class="status-title" id="status-title">Ready to Scan</div>
         <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
-        <div id="countdown-display" style="font-size: 20px; font-weight: 700; color: #f97316; margin-top: 8px; display: none;"></div>
+        <div id="countdown-display" style="font-size: 18px; font-weight: 700; color: #f97316; margin-top: 6px; display: none;"></div>
     </div>
 
     <div class="signal-action" id="signal-action"></div>
 
+    <!-- Readings - Real Quotes header -->
     <div class="readings-header">
-        <span>Readings • market analysis</span>
+        <span>Readings • real quotes</span>
         <span id="scan-counter">0 of 8</span>
     </div>
 
+    <!-- 8 Readings Grid -->
     <div class="grid-8">
         <div class="reading-card" id="card-1">
-            <div class="reading-label">Trend - 1h</div>
+            <div class="reading-label">📈 Trend - 1h</div>
             <div class="reading-val" id="val-trend">-</div>
         </div>
         <div class="reading-card" id="card-2">
-            <div class="reading-label">Support</div>
+            <div class="reading-label">🛡️ Support</div>
             <div class="reading-val" id="val-support">-</div>
         </div>
         <div class="reading-card" id="card-3">
-            <div class="reading-label" id="lbl-move">Move over 10 sec</div>
+            <div class="reading-label" id="lbl-move">Move over 1 min</div>
             <div class="reading-val" id="val-move">-</div>
         </div>
         <div class="reading-card" id="card-4">
-            <div class="reading-label">Momentum</div>
+            <div class="reading-label">⚡ Momentum</div>
             <div class="reading-val" id="val-momentum">-</div>
         </div>
         <div class="reading-card" id="card-5">
-            <div class="reading-label">Session</div>
+            <div class="reading-label">🌍 Session</div>
             <div class="reading-val" id="val-session">-</div>
         </div>
         <div class="reading-card" id="card-6">
-            <div class="reading-label">EMA 50/200</div>
+            <div class="reading-label">📊 EMA 50/200</div>
             <div class="reading-val" id="val-ema">-</div>
         </div>
         <div class="reading-card" id="card-7">
-            <div class="reading-label">Price at level</div>
+            <div class="reading-label">💎 Price at level</div>
             <div class="reading-val" id="val-price">-</div>
         </div>
         <div class="reading-card" id="card-8">
-            <div class="reading-label">RSI</div>
+            <div class="reading-label">📉 RSI</div>
             <div class="reading-val" id="val-rsi">-</div>
         </div>
     </div>
 
     <button class="btn-orange" id="get-signal-btn" onclick="startAnalysis()">⚡ Get signal</button>
 
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+            <div>Today</div>
+        </div>
+        <div class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+            <div>Signal</div>
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            <div>Profile</div>
+        </div>
+    </div>
+
     <script>
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.expand();
         }
 
-        let selectedTimeframe = "10 sec";
+        let selectedTimeframe = "1 min";
+        let selectedAIModel = "Fable 5.1";
 
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -172,6 +262,24 @@
                 document.getElementById('lbl-move').innerText = `Move over ${selectedTimeframe}`;
             });
         });
+
+        function selectAI(element) {
+            document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            selectedAIModel = element.getAttribute('data-ai');
+        }
+
+        function selectPairQuick(pairName) {
+            document.querySelectorAll('.top-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('pair-select').value = pairName;
+            updatePairLabel();
+        }
+
+        function updatePairLabel() {
+            const val = document.getElementById('pair-select').value;
+            document.getElementById('current-pair-title').innerText = val;
+        }
 
         function unlockApp() {
             const code = document.getElementById('secret-code').value.trim();
@@ -194,7 +302,7 @@
             btn.disabled = true;
             signalAction.innerText = "";
             countdownEl.style.display = 'none';
-            statusTitle.innerText = "Analyzing...";
+            statusTitle.innerText = "Executing Market...";
             statusTitle.style.color = "#f97316";
 
             const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
@@ -227,9 +335,9 @@
                     const card = document.getElementById(`card-${i + 1}`);
                     card.classList.add('scanning');
                     counter.innerText = `${i + 1} of 8`;
-                    statusSub.innerText = `⚡ Analyzing step ${i + 1} of 8...`;
+                    statusSub.innerText = `⚡ ${selectedAIModel} fetching quote • step ${i + 1} of 8...`;
                     
-                    await new Promise(r => setTimeout(r, 450));
+                    await new Promise(r => setTimeout(r, 350));
                     
                     card.classList.remove('scanning');
                     card.classList.add(isUp ? 'success-green' : 'success-red');
@@ -241,20 +349,18 @@
 
                 statusTitle.innerText = isUp ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
                 statusTitle.style.color = isUp ? "#22c55e" : "#ef4444";
-                statusSub.innerText = `${pair} • ${selectedTimeframe}`;
+                statusSub.innerText = `${pair} • ${selectedTimeframe} (${selectedAIModel})`;
                 
                 signalAction.innerText = data.signal_text;
                 signalAction.className = isUp ? "signal-action" : "signal-action down";
 
-                // Revèy 10 segond (oswa selon timeframe chwazi a)
+                // Revèy dekont pou antre nan pozisyon
                 countdownEl.style.display = 'block';
-                let timeLeft = 10; 
-                
+                let timeLeft = 10;
                 if (selectedTimeframe.includes("sec")) {
-                    let numSec = parseInt(selectedTimeframe);
-                    if (!isNaN(numSec) && numSec <= 15) {
-                        timeLeft = numSec;
-                    }
+                    timeLeft = parseInt(selectedTimeframe) || 10;
+                } else {
+                    timeLeft = 15;
                 }
 
                 const timerInterval = setInterval(() => {
