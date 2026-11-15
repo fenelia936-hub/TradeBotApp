@@ -99,17 +99,18 @@
         <label>Trade time</label>
         <div class="tf-grid" id="tf-container">
             <div class="tf-btn" data-tf="3 sec">3 sec</div>
-            <div class="tf-btn active" data-tf="5 sec">5 sec</div>
+            <div class="tf-btn" data-tf="5 sec">5 sec</div>
+            <div class="tf-btn active" data-tf="10 sec">10 sec</div>
             <div class="tf-btn" data-tf="15 sec">15 sec</div>
             <div class="tf-btn" data-tf="30 sec">30 sec</div>
             <div class="tf-btn" data-tf="1 min">1 min</div>
-            <div class="tf-btn" data-tf="2 min">2 min</div>
         </div>
     </div>
 
     <div class="status-box">
         <div class="status-title" id="status-title">Ready to Scan</div>
         <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
+        <div id="countdown-display" style="font-size: 20px; font-weight: 700; color: #f97316; margin-top: 8px; display: none;"></div>
     </div>
 
     <div class="signal-action" id="signal-action"></div>
@@ -129,7 +130,7 @@
             <div class="reading-val" id="val-support">-</div>
         </div>
         <div class="reading-card" id="card-3">
-            <div class="reading-label" id="lbl-move">Move over 5 sec</div>
+            <div class="reading-label" id="lbl-move">Move over 10 sec</div>
             <div class="reading-val" id="val-move">-</div>
         </div>
         <div class="reading-card" id="card-4">
@@ -161,7 +162,7 @@
             window.Telegram.WebApp.expand();
         }
 
-        let selectedTimeframe = "5 sec";
+        let selectedTimeframe = "10 sec";
 
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -188,15 +189,16 @@
             const statusSub = document.getElementById('status-sub');
             const signalAction = document.getElementById('signal-action');
             const counter = document.getElementById('scan-counter');
+            const countdownEl = document.getElementById('countdown-display');
 
             btn.disabled = true;
             signalAction.innerText = "";
+            countdownEl.style.display = 'none';
             statusTitle.innerText = "Analyzing...";
             statusTitle.style.color = "#f97316";
 
             const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
             
-            // Reyajiste tout kat yo
             for (let i = 1; i <= 8; i++) {
                 const c = document.getElementById(`card-${i}`);
                 c.className = "reading-card";
@@ -221,19 +223,15 @@
 
                 const isUp = data.direction === "HIGHER";
 
-                // Eskanè youn pa youn ak koulè an tan reyèl
                 for (let i = 0; i < 8; i++) {
                     const card = document.getElementById(`card-${i + 1}`);
                     card.classList.add('scanning');
                     counter.innerText = `${i + 1} of 8`;
                     statusSub.innerText = `⚡ Analyzing step ${i + 1} of 8...`;
                     
-                    // Bay tan pou vizyalizasyon an (450ms pa bwat pou l pa twò rapid)
                     await new Promise(r => setTimeout(r, 450));
                     
                     card.classList.remove('scanning');
-                    
-                    // Aplike koulè dapre direksyon siyal la (vèt pou Higher, wouj pou Lower)
                     card.classList.add(isUp ? 'success-green' : 'success-red');
                     
                     const valEl = document.getElementById(valIds[i]);
@@ -247,6 +245,27 @@
                 
                 signalAction.innerText = data.signal_text;
                 signalAction.className = isUp ? "signal-action" : "signal-action down";
+
+                // Revèy 10 segond (oswa selon timeframe chwazi a)
+                countdownEl.style.display = 'block';
+                let timeLeft = 10; 
+                
+                if (selectedTimeframe.includes("sec")) {
+                    let numSec = parseInt(selectedTimeframe);
+                    if (!isNaN(numSec) && numSec <= 15) {
+                        timeLeft = numSec;
+                    }
+                }
+
+                const timerInterval = setInterval(() => {
+                    if (timeLeft > 0) {
+                        countdownEl.innerText = `⏳ Antre nan pozisyon nan: ${timeLeft}s`;
+                        timeLeft--;
+                    } else {
+                        countdownEl.innerText = `🚀 Klike kounye a! (${selectedTimeframe})`;
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
 
             } catch (err) {
                 statusTitle.innerText = "Connection Error";
