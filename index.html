@@ -3,69 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GPT Trading Bot - Pro</title>
+    <title>Trade Bot Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
+        body { background-color: #121212; color: #ffffff; padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        #auth-screen { position: fixed; inset: 0; background: #0b0f19; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
-        .auth-box { background: #131b2e; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #1e293b; }
-        .auth-box h2 { margin-bottom: 8px; font-size: 20px; color: #22c55e; }
-        .auth-box p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-        .auth-box input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 16px; margin-bottom: 14px; text-align: center; outline: none; }
+        #auth-screen { position: fixed; inset: 0; background: #121212; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
+        .auth-box { background: #1c1c1e; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #2c2c2e; }
+        .auth-box h2 { margin-bottom: 8px; font-size: 20px; }
+        .auth-box p { color: #8e8e93; font-size: 14px; margin-bottom: 20px; }
+        .auth-box input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #3a3a3c; background: #2c2c2e; color: white; font-size: 16px; margin-bottom: 14px; text-align: center; }
         
-        .header { text-align: center; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .header span { color: #94a3b8; font-size: 13px; font-weight: 500; }
-        .gpt-badge { background: #22c55e; color: #0b0f19; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-
-        .card { background: #131b2e; border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid #1e293b; }
-        label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+        .header { text-align: center; margin-bottom: 16px; }
+        .header span { color: #8e8e93; font-size: 13px; }
         
-        select { width: 100%; background: #1e293b; color: #ffffff; border: 1px solid #334155; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; outline: none; }
+        .card { background: #1c1c1e; border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid #2c2c2e; }
+        label { display: block; font-size: 12px; color: #8e8e93; margin-bottom: 6px; }
+        
+        select { width: 100%; background: #2c2c2e; color: #ffffff; border: 1px solid #3a3a3c; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; outline: none; }
         
         .tf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-        .tf-btn { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 10px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
-        .tf-btn.active { background: rgba(34, 197, 94, 0.2); border-color: #22c55e; color: #22c55e; }
+        .tf-btn { background: #2c2c2e; border: 1px solid #3a3a3c; color: #d1d1d6; padding: 10px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: 0.2s; }
+        .tf-btn.active { background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316; }
 
-        .status-box { background: linear-gradient(145deg, #132e1e, #0f1a14); border: 1px solid #166534; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
-        .status-title { font-size: 24px; font-weight: 800; color: #22c55e; margin-bottom: 6px; }
-        .status-sub { font-size: 13px; color: #94a3b8; }
-        
+        .status-box { background: linear-gradient(145deg, #1e241e, #181c18); border: 1px solid #2e3b2e; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
+        .status-title { font-size: 22px; font-weight: 700; color: #f97316; margin-bottom: 6px; }
+        .status-sub { font-size: 13px; color: #a1a1aa; }
         .signal-action { font-size: 17px; font-weight: 700; margin: 12px 0; text-align: center; color: #22c55e; }
         .signal-action.down { color: #ef4444; }
 
-        .readings-header { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 8px; padding: 0 4px; }
+        .readings-header { display: flex; justify-content: space-between; font-size: 12px; color: #8e8e93; margin-bottom: 8px; padding: 0 4px; }
         .grid-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
         
-        .reading-card { background: #131b2e; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; transition: 0.3s; }
-        .reading-card.scanning { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.3); background: #152219; }
+        .reading-card { background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px; padding: 12px; transition: 0.3s; }
+        .reading-card.scanning { border-color: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); background: #25201d; }
         .reading-card.success-green { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); }
         .reading-card.success-red { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
         
-        .reading-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+        .reading-label { font-size: 11px; color: #8e8e93; margin-bottom: 4px; }
         .reading-val { font-size: 13px; font-weight: 600; color: #ffffff; }
         .reading-val.green { color: #22c55e; }
         .reading-val.red { color: #ef4444; }
 
-        .btn-green { width: 100%; background: #22c55e; color: #0b0f19; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: auto; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
-        .btn-green:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-orange { width: 100%; background: #f97316; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: auto; }
+        .btn-orange:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="auth-box">
-            <h2>GPT Trading Bot ⚡</h2>
-            <p>Antre kòd sekrè w la pou w louvri bot la.</p>
+            <h2>Aksè Restrikte 🔒</h2>
+            <p>Antre kòd sekrè w la pou w ka itilize bot la.</p>
             <input type="password" id="secret-code" placeholder="Antre kòd la...">
-            <button class="btn-green" onclick="unlockApp()">Lanse Bot la</button>
+            <button class="btn-orange" onclick="unlockApp()">Desann / Louvri</button>
         </div>
     </div>
 
     <div class="header">
-        <div class="gpt-badge">GPT AI</div>
-        <span>Trade Bot • Manual Control (98% Filter)</span>
+        <span>Trade Bot • mini app</span>
     </div>
 
     <div class="card">
@@ -81,15 +78,25 @@
                 <option value="EUR/GBP OTC">EUR/GBP OTC</option>
                 <option value="EUR/JPY OTC">EUR/JPY OTC</option>
                 <option value="GBP/JPY OTC">GBP/JPY OTC</option>
+                <option value="AUD/CAD OTC">AUD/CAD OTC</option>
+                <option value="NZD/USD OTC">NZD/USD OTC</option>
             </optgroup>
             <optgroup label="🥇 Metal (Lò / Gold)">
-                <option value="GOLD (XAU/USD) OTC">GOLD OTC</option>
+                <option value="GOLD (XAU/USD) OTC">GOLD (XAU/USD) OTC</option>
+                <option value="GOLD (XAU/USD)">GOLD (XAU/USD)</option>
+            </optgroup>
+            <optgroup label="🌍 Forex Mache Reyèl">
+                <option value="EUR/USD">EUR/USD</option>
+                <option value="GBP/USD">GBP/USD</option>
+                <option value="USD/JPY">USD/JPY</option>
+                <option value="AUD/USD">AUD/USD</option>
+                <option value="USD/CAD">USD/CAD</option>
             </optgroup>
         </select>
     </div>
 
     <div class="card">
-        <label>Trade time (Optimized for 3s-5s)</label>
+        <label>Trade time</label>
         <div class="tf-grid" id="tf-container">
             <div class="tf-btn" data-tf="3 sec">3 sec</div>
             <div class="tf-btn active" data-tf="5 sec">5 sec</div>
@@ -101,29 +108,53 @@
     </div>
 
     <div class="status-box">
-        <div class="status-title" id="status-title">Ready for Analysis</div>
-        <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get AI Signal</div>
+        <div class="status-title" id="status-title">Ready to Scan</div>
+        <div class="status-sub" id="status-sub">⚡ Select pair & time, then tap Get signal</div>
     </div>
 
     <div class="signal-action" id="signal-action"></div>
 
     <div class="readings-header">
-        <span>AI Filter Analysis • Sessions Visible</span>
+        <span>Readings • market analysis</span>
         <span id="scan-counter">0 of 8</span>
     </div>
 
     <div class="grid-8">
-        <div class="reading-card" id="card-1"><div class="reading-label">Trend - 1h</div><div class="reading-val" id="val-trend">-</div></div>
-        <div class="reading-card" id="card-2"><div class="reading-label">Support</div><div class="reading-val" id="val-support">-</div></div>
-        <div class="reading-card" id="card-3"><div class="reading-label" id="lbl-move">Move over 5 sec</div><div class="reading-val" id="val-move">-</div></div>
-        <div class="reading-card" id="card-4"><div class="reading-label">Momentum</div><div class="reading-val" id="val-momentum">-</div></div>
-        <div class="reading-card" id="card-5"><div class="reading-label">Session</div><div class="reading-val" id="val-session">-</div></div>
-        <div class="reading-card" id="card-6"><div class="reading-label">EMA 50/200</div><div class="reading-val" id="val-ema">-</div></div>
-        <div class="reading-card" id="card-7"><div class="reading-label">Price at level</div><div class="reading-val" id="val-price">-</div></div>
-        <div class="reading-card" id="card-8"><div class="reading-label">RSI</div><div class="reading-val" id="val-rsi">-</div></div>
+        <div class="reading-card" id="card-1">
+            <div class="reading-label">Trend - 1h</div>
+            <div class="reading-val" id="val-trend">-</div>
+        </div>
+        <div class="reading-card" id="card-2">
+            <div class="reading-label">Support</div>
+            <div class="reading-val" id="val-support">-</div>
+        </div>
+        <div class="reading-card" id="card-3">
+            <div class="reading-label" id="lbl-move">Move over 5 sec</div>
+            <div class="reading-val" id="val-move">-</div>
+        </div>
+        <div class="reading-card" id="card-4">
+            <div class="reading-label">Momentum</div>
+            <div class="reading-val" id="val-momentum">-</div>
+        </div>
+        <div class="reading-card" id="card-5">
+            <div class="reading-label">Session</div>
+            <div class="reading-val" id="val-session">-</div>
+        </div>
+        <div class="reading-card" id="card-6">
+            <div class="reading-label">EMA 50/200</div>
+            <div class="reading-val" id="val-ema">-</div>
+        </div>
+        <div class="reading-card" id="card-7">
+            <div class="reading-label">Price at level</div>
+            <div class="reading-val" id="val-price">-</div>
+        </div>
+        <div class="reading-card" id="card-8">
+            <div class="reading-label">RSI</div>
+            <div class="reading-val" id="val-rsi">-</div>
+        </div>
     </div>
 
-    <button class="btn-green" id="get-signal-btn" onclick="startAnalysis()">✨ Get AI Signal (Manual Control)</button>
+    <button class="btn-orange" id="get-signal-btn" onclick="startAnalysis()">⚡ Get signal</button>
 
     <script>
         if (window.Telegram && window.Telegram.WebApp) {
@@ -131,7 +162,6 @@
         }
 
         let selectedTimeframe = "5 sec";
-        let activeTimer = null;
 
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -159,15 +189,14 @@
             const signalAction = document.getElementById('signal-action');
             const counter = document.getElementById('scan-counter');
 
-            if (activeTimer) clearInterval(activeTimer);
-
             btn.disabled = true;
             signalAction.innerText = "";
-            statusTitle.innerText = "Analyzing Market Setup...";
-            statusTitle.style.color = "#22c55e";
+            statusTitle.innerText = "Analyzing...";
+            statusTitle.style.color = "#f97316";
 
             const valIds = ['val-trend', 'val-support', 'val-move', 'val-momentum', 'val-session', 'val-ema', 'val-price', 'val-rsi'];
             
+            // Reyajiste tout kat yo
             for (let i = 1; i <= 8; i++) {
                 const c = document.getElementById(`card-${i}`);
                 c.className = "reading-card";
@@ -192,15 +221,19 @@
 
                 const isUp = data.direction === "HIGHER";
 
+                // Eskanè youn pa youn ak koulè an tan reyèl
                 for (let i = 0; i < 8; i++) {
                     const card = document.getElementById(`card-${i + 1}`);
                     card.classList.add('scanning');
                     counter.innerText = `${i + 1} of 8`;
-                    statusSub.innerText = `✨ Scanning step ${i + 1} of 8 (${data.session})...`;
+                    statusSub.innerText = `⚡ Analyzing step ${i + 1} of 8...`;
                     
-                    await new Promise(r => setTimeout(r, 380));
+                    // Bay tan pou vizyalizasyon an (450ms pa bwat pou l pa twò rapid)
+                    await new Promise(r => setTimeout(r, 450));
                     
                     card.classList.remove('scanning');
+                    
+                    // Aplike koulè dapre direksyon siyal la (vèt pou Higher, wouj pou Lower)
                     card.classList.add(isUp ? 'success-green' : 'success-red');
                     
                     const valEl = document.getElementById(valIds[i]);
@@ -208,27 +241,12 @@
                     valEl.classList.add(isUp ? 'green' : 'red');
                 }
 
-                statusTitle.innerText = isUp ? "CALL / BUY ↗" : "PUT / SELL ↘";
+                statusTitle.innerText = isUp ? "BUY / HIGHER ↗" : "SELL / LOWER ↘";
                 statusTitle.style.color = isUp ? "#22c55e" : "#ef4444";
+                statusSub.innerText = `${pair} • ${selectedTimeframe}`;
                 
                 signalAction.innerText = data.signal_text;
                 signalAction.className = isUp ? "signal-action" : "signal-action down";
-
-                // Revèy Antre (Entry Countdown Timer - 10 segond)
-                let timeLeft = 10;
-                statusSub.innerText = `⏳ Entry window open: ${timeLeft}s (${data.session})`;
-                statusSub.style.color = "#22c55e";
-
-                activeTimer = setInterval(() => {
-                    timeLeft--;
-                    if (timeLeft > 0) {
-                        statusSub.innerText = `⏳ Entry window open: ${timeLeft}s (${data.session})`;
-                    } else {
-                        clearInterval(activeTimer);
-                        statusSub.innerText = "🔒 Entry window closed - Wait next signal";
-                        statusSub.style.color = "#ef4444";
-                    }
-                }, 1000);
 
             } catch (err) {
                 statusTitle.innerText = "Connection Error";
